@@ -1,8 +1,8 @@
-def add(int a , int b) {
+def mul(int a , int b) {
    c = a*b
    println(c)
 }
-def add(int a , int b) {
+def div(int a , int b) {
    c = a/b
    println(c)
 }
