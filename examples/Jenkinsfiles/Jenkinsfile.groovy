@@ -34,9 +34,9 @@ parallel SLAVE1: {
 								   }catch(err){
 									     echo "First build failed, let's retry once more"
 										 retry(1) {
-                                             sleep 90
-                                             bm_aws_status.getVagrantMachineStatus(machine_name,workspace_path,slave1_machine_path)
-											 bm_aws_create.createEC2(machine_name,workspace_path,slave1_machine_path,notification)
+											     sleep 90
+											     bm_aws_status.getVagrantMachineStatus(machine_name,workspace_path,slave1_machine_path)
+											     bm_aws_create.createEC2(machine_name,workspace_path,slave1_machine_path,notification)
 										 }
 											  
 								   } 
