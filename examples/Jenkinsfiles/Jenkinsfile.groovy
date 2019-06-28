@@ -30,13 +30,13 @@ parallel SLAVE1: {
 						      if("${SAHI_SLAVE1}" == "true"){
 						       try{
 									     echo 'Creating '+ rtc_sahi_slave1
-									     bm_aws_create.checkIfBuildExistOnS3(machine_name,workspace_path,slave1_machine_path,notification)			
+									     bm_aws_create.createEC2(machine_name,workspace_path,slave1_machine_path,notification)			
 								   }catch(err){
 									     echo "First build failed, let's retry once more"
 										 retry(1) {
                                              sleep 90
-                                             bm_aws_status.checkIfBuildExistOnS3(machine_name,workspace_path,slave1_machine_path)
-											 bm_aws_create.checkIfBuildExistOnS3(machine_name,workspace_path,slave1_machine_path,notification)
+                                             bm_aws_status.getVagrantMachineStatus(machine_name,workspace_path,slave1_machine_path)
+											 bm_aws_create.createEC2(machine_name,workspace_path,slave1_machine_path,notification)
 										 }
 											  
 								   } 
