@@ -1,0 +1,1 @@
+deployment_list: "'helm_chart1', 'helm_chart2', 'helm_chart3', 'helm_chart4', 'helm_chart5', 'helm_chart6'"

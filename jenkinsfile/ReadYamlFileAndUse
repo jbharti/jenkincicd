@@ -1,0 +1,60 @@
+def readParameters(Map config = [:])
+{
+	echo "read parameter from yaml file"
+	values_yaml = readYaml(file: "values.yaml")
+	env.list = values_yaml.deployment_list
+	
+	def pipeline_parameters = ""
+	
+	pipeline_parameters = input (
+	
+							message : 'select the parameters for pipeline',
+							parameter: [ 
+								choice(choices:var_choices, description: 'Please select deployment envinonment', name: 'Environment'),
+								[$class: 'CascadeChoiceParameter', choiceType: 'PT_CHECKBOX', description: 'select chart for deployment', filterLength: 1, filterable: true,
+									name: 'chart_name', referencedParameters: 'Environment',
+									script: [$class: 'GroovyScript',
+											fallbackScript: [
+												classpath: [],
+												sandbox: true,
+												script: 'return ["ERROR"]'
+											],
+											script: [											
+												classpath: [],
+												sandbox: true,
+												script: """
+													return [${list}]
+												""".stripIndent()
+											]
+										]
+								]
+							]		
+	
+						)
+}
+
+
+
+pipeline {
+    agent any  // Runs on any available agent
+
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building the project...'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo 'Running tests...'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying the application...'
+            }
+        }
+    }
+}
