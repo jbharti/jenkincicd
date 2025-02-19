@@ -1,6 +1,6 @@
 def readParameters(Map config = [:])
 {
-	echo "read parameter from yaml file"
+	echo "read parameter from yaml file using Pipeline Utility Steps plugin"
 	values_yaml = readYaml(file: "values.yaml")
 	env.list = values_yaml.deployment_list
 	
