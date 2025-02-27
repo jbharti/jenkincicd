@@ -1,59 +1,73 @@
-def readParameters(Map config = [:])
-{
-	echo "read parameter from yaml file"
-	values_yaml = readYaml(file: "values.yaml")
-	env.list = values_yaml.deployment_list
-	
-	def pipeline_parameters = ""
-	
-	pipeline_parameters = input (
-	
-							message : 'select the parameters for pipeline',
-							parameter: [ 
-								choice(choices:var_choices, description: 'Please select deployment envinonment', name: 'Environment'),
-								[$class: 'CascadeChoiceParameter', choiceType: 'PT_CHECKBOX', description: 'select chart for deployment', filterLength: 1, filterable: true,
-									name: 'chart_name', referencedParameters: 'Environment',
-									script: [$class: 'GroovyScript',
-											fallbackScript: [
-												classpath: [],
-												sandbox: true,
-												script: 'return ["ERROR"]'
-											],
-											script: [											
-												classpath: [],
-												sandbox: true,
-												script: """
-													return [${list}]
-												""".stripIndent()
-											]
-										]
-								]
-							]		
-	
-						)
+def readParameters(Map config = [:]) {
+    echo "Reading parameters from YAML file using Pipeline Utility Steps plugin"
+
+    // Read the YAML file
+    def values_yaml = readYaml(file: "values.yaml")
+    
+    // Debugging: Print YAML contents
+    echo "YAML Content: ${values_yaml}"
+    
+    // Ensure deployment_list is available
+    env.list = values_yaml.deployment_list
+    
+    def pipeline_parameters = ""
+    def var_choices = "dev"
+
+    pipeline_parameters = input(
+        message: 'Select the parameters for pipeline',
+        parameters: [
+            choice(choices: var_choices, description: 'Please select deployment environment', name: 'Environment'),
+            [$class: 'CascadeChoiceParameter', choiceType: 'PT_CHECKBOX', description: 'Select chart for deployment', 
+                filterLength: 1, filterable: true, name: 'chart_names', referencedParameters: 'Environment',
+                script: [
+                    $class: 'GroovyScript',
+                    fallbackScript: [
+                        classpath: [],
+                        sandbox: true,
+                        script: 'return ["ERROR"]'
+                    ],
+                    script: [
+                        classpath: [],
+                        sandbox: true,
+                        script: """
+                            return [${env.list}]
+                        """.stripIndent()
+                    ]
+                ]
+            ],
+			string(name: 'STRING_PARAM', defaultValue: 'DefaultString', description: 'Enter a string value'),
+			text(name: 'TEXT_PARAM', defaultValue: 'Multi-line\ndefault\nvalue', description: 'Enter a multi-line text'),
+			booleanParam(name: 'BOOLEAN_PARAM', defaultValue: true, description: 'Enable or disable this option'),
+			choice(name: 'CHOICE_PARAM', choices: ['Option1', 'Option2', 'Option3'], description: 'Select an option'),
+			password(name: 'PASSWORD_PARAM', defaultValue: 'Secret123', description: 'Enter a password (masked)'),			
+			credentials(name: 'CREDENTIALS_PARAM', description: 'Select Jenkins credentials')
+        ]
+		
+    )
+
+	echo "Pipeline Parameters: ${pipeline_parameters}"
+	env.exe_env = pipeline_parameters.Environment.trim()
+	env.deployment_list = pipeline_parameters?.chart_names
+
+	env.STRING_PARAM=pipeline_parameters.STRING_PARAM
+	env.TEXT_PARAM=pipeline_parameters.TEXT_PARAM
+	env.BOOLEAN_PARAM=pipeline_parameters.BOOLEAN_PARAM
+	env.CHOICE_PARAM=pipeline_parameters.CHOICE_PARAM
+	env.PASSWORD_PARAM=pipeline_parameters.PASSWORD_PARAM	
+	env.CREDENTIALS_PARAM=pipeline_parameters.CREDENTIALS_PARAM
+   
 }
 
-
-
 pipeline {
-    agent any  // Runs on any available agent
+    agent any
 
     stages {
-        stage('Build') {
+        stage('Set Params') {
             steps {
                 echo 'Building the project...'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                echo 'Running tests...'
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                echo 'Deploying the application...'
+                script {
+                    readParameters()
+                }
             }
         }
     }
