@@ -1,0 +1,22 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Load .env Variables') {
+            steps {
+                script {
+                    def envVars = readProperties file: '.env'
+                    envVars.each { key, value ->
+                        env[key] = value
+                    }
+                }
+            }
+        }
+
+        stage('Use .env Variables') {
+            steps {
+                echo "MY_VARIABLE = ${env.MY_VARIABLE}"
+            }
+        }
+    }
+}
